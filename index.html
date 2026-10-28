@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b3477">
+  <title>SmartDoc Locker — Your documents, intelligently organized</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+  <header class="topbar">
+    <a class="brand" href="#" id="brandHome" aria-label="SmartDoc Locker home">
+      <span class="brand-mark">▤<i>⌑</i></span>
+      <span>SmartDoc <b>Locker</b></span>
+    </a>
+    <div class="topbar-right">
+      <span class="secure-pill"><span class="pulse-dot"></span> Private workspace</span>
+      <button id="headerSignOut" class="button button-quiet hidden">Sign out</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- PAGE 1: INTRO -->
+    <section id="pageWelcome" class="page welcome-page active">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="sparkle">✦</span> YOUR DOCUMENTS, IN ONE SMART PLACE</div>
+        <h1>Less searching.<br><span>More certainty.</span></h1>
+        <p class="hero-description">A smarter way to organize, find, and understand your important documents. Secure storage meets intelligent search in one calm workspace.</p>
+        <div class="hero-actions">
+          <button class="button button-primary button-large" id="getStarted">Get started <span>↗</span></button>
+          <a class="text-link" href="#features">Explore features <span>↓</span></a>
+        </div>
+        <div class="hero-proof"><div class="avatar-stack"><span>✓</span><span>⌕</span><span>▤</span></div><div><strong>Organized by you.</strong><small>Accessible when you need it.</small></div></div>
+      </div>
+      <div class="hero-art" aria-label="Illustration of secure documents">
+        <div class="orbit orbit-a"></div><div class="orbit orbit-b"></div>
+        <div class="float-card float-card-back"><span class="file-icon purple">PDF</span><span class="fake-lines"><i></i><i></i><i></i></span><span class="tiny-check">✓</span></div>
+        <div class="float-card float-card-left"><span class="file-icon mint">ID</span><strong>Identity</strong><small>Document detected</small></div>
+        <div class="main-folder">
+          <div class="folder-tab"></div><div class="folder-shield">⌑</div>
+          <div class="folder-lines"><i></i><i></i><i></i></div>
+          <div class="folder-lock">⌑</div>
+        </div>
+        <div class="scan-chip"><span class="scan-dot"></span> Smart search ready</div>
+        <div class="float-card float-card-right"><span class="mini-spark">✦</span><strong>Smart search</strong><small>Find it in seconds</small></div>
+      </div>
+      <div id="features" class="feature-strip">
+        <article><span class="feature-symbol blue-symbol">⌕</span><div><h3>Find anything</h3><p>Search your saved documents by name or category.</p></div></article>
+        <article><span class="feature-symbol violet-symbol">✦</span><div><h3>Understand faster</h3><p>Extract text from supported images and PDFs.</p></div></article>
+        <article><span class="feature-symbol green-symbol">♧</span><div><h3>Stay in control</h3><p>Private account access and masked details.</p></div></article>
+      </div>
+      <p class="page-footnote">Student project prototype · Do not upload real identity or financial documents until security has been reviewed.</p>
+    </section>
+
+    <!-- PAGE 2: AUTH -->
+    <section id="pageAuth" class="page auth-page">
+      <div class="auth-side">
+        <div class="auth-side-icon">▤</div>
+        <p class="eyebrow">WELCOME TO SMARTDOC</p>
+        <h2>Your essentials,<br>always in order.</h2>
+        <p>Create a private workspace for the documents that matter to you.</p>
+        <div class="auth-side-list"><span>✓ Organized document library</span><span>✓ Search across your uploads</span><span>✓ You control your account</span></div>
+      </div>
+      <div class="auth-panel">
+        <button class="back-link" id="backWelcome">← Back to home</button>
+        <div class="auth-heading"><h2 id="authTitle">Create your account</h2><p id="authSubtitle">Start with your email and a strong password.</p></div>
+        <form id="authForm">
+          <label id="nameField">Full name<input id="fullName" type="text" autocomplete="name" placeholder="Your name" maxlength="80"></label>
+          <label>Email address<input id="email" type="email" autocomplete="email" placeholder="you@example.com" required></label>
+          <label>Password<div class="password-wrap"><input id="password" type="password" autocomplete="new-password" placeholder="At least 8 characters" minlength="8" required><button type="button" id="togglePassword" class="eye-button" aria-label="Show password">Show</button></div></label>
+          <div id="confirmField"><label>Confirm password<input id="confirmPassword" type="password" autocomplete="new-password" placeholder="Re-enter password" minlength="8"></label></div>
+          <div class="auth-options"><label class="checkbox-label"><input id="rememberMe" type="checkbox" checked> Keep me signed in</label><button type="button" id="forgotPassword" class="inline-link">Forgot password?</button></div>
+          <button class="button button-primary full-width" id="authSubmit" type="submit">Create account <span>→</span></button>
+          <p id="authMessage" class="form-message" role="status"></p>
+        </form>
+        <p class="switch-auth"><span id="switchText">Already have an account?</span> <button id="switchAuth" class="inline-link">Sign in</button></p>
+        <p class="legal-note">By continuing, you agree to use this prototype responsibly. Never upload documents you do not have permission to store.</p>
+      </div>
+    </section>
+
+    <!-- PAGE 3: UPLOAD -->
+    <section id="pageUpload" class="page app-page">
+      <div class="page-heading">
+        <div><p class="eyebrow">YOUR PRIVATE LIBRARY · STEP 1 OF 2</p><h1>Build your document library</h1><p>Add at least four documents to continue. You can add more at any time.</p></div>
+        <div class="user-chip"><span class="user-avatar" id="uploadAvatar">U</span><span id="uploadUserName">Your workspace</span></div>
+      </div>
+      <div class="progress-card"><div class="progress-top"><div><strong id="uploadCount">0 documents added</strong><p id="uploadProgressText">Add 4 documents to unlock your dashboard.</p></div><span class="progress-number" id="progressNumber">0 / 4</span></div><div class="progress-track"><span id="progressBar"></span></div></div>
+      <div class="upload-layout">
+        <div class="upload-main card">
+          <div class="section-title"><div><h2>Add a document</h2><p>Choose a category, then select a file.</p></div><span class="soft-tag">JPG · PNG · PDF</span></div>
+          <form id="uploadForm">
+            <label class="form-label">Document category<select id="docType" required></select></label>
+            <label class="dropzone" id="dropzone" for="docFile">
+              <input id="docFile" type="file" accept=".pdf,image/png,image/jpeg,image/webp" hidden>
+              <span class="upload-cloud">↑</span><strong id="dropTitle">Drop a file here or <u>browse</u></strong><span id="dropSubtitle">PDF, PNG, JPG or WEBP · Up to 10 MB</span>
+            </label>
+            <div id="filePreview" class="file-preview hidden"></div>
+            <button id="uploadButton" class="button button-primary full-width" type="submit" disabled>Upload document <span>↑</span></button>
+            <p id="uploadMessage" class="form-message" role="status"></p>
+          </form>
+          <div class="privacy-callout"><span>⌑</span><div><strong>Privacy first</strong><p>Use sample files for your college demo. This prototype masks detected number-like strings, but that is not a substitute for a security review.</p></div></div>
+        </div>
+        <aside class="suggested-card card">
+          <div class="section-title"><div><h2>Suggested documents</h2><p>Choose from these categories.</p></div></div>
+          <div id="suggestedTypes" class="suggested-list"></div>
+        </aside>
+      </div>
+      <div class="upload-bottom"><span id="uploadedSummary">Your uploaded documents will appear here.</span><div class="upload-bottom-actions"><button id="uploadMore" class="button button-secondary">Upload more</button><button id="continueDashboard" class="button button-primary" disabled>Continue to dashboard <span>→</span></button></div></div>
+      <div id="uploadedGrid" class="uploaded-grid"></div>
+    </section>
+
+    <!-- PAGE 4: DASHBOARD -->
+    <section id="pageDashboard" class="page app-page">
+      <div class="dashboard-header"><div><p class="eyebrow">YOUR PRIVATE WORKSPACE</p><h1>Good to see you, <span id="dashboardName">there</span> <span class="wave">✦</span></h1><p>Everything important, organized in one place.</p></div><button id="dashboardUpload" class="button button-primary">＋ Add document</button></div>
+      <div class="stat-grid">
+        <article class="stat-card"><span class="stat-icon stat-blue">▤</span><div><p>Total documents</p><strong id="totalDocs">0</strong><small>In your library</small></div></article>
+        <article class="stat-card"><span class="stat-icon stat-purple">⌕</span><div><p>Categories</p><strong id="totalCategories">0</strong><small>Document types</small></div></article>
+        <article class="stat-card"><span class="stat-icon stat-green">✓</span><div><p>Text extracted</p><strong id="ocrDocs">0</strong><small>OCR processed</small></div></article>
+      </div>
+      <div class="dashboard-grid">
+        <section class="card library-card">
+          <div class="section-title"><div><h2>Your documents</h2><p>Search by name, type, or extracted text.</p></div><button id="backToUpload" class="inline-link">Manage uploads</button></div>
+          <div class="search-row"><span>⌕</span><input id="documentSearch" type="search" placeholder="Try “Aadhaar card” or “marks card”"><button id="clearSearch" aria-label="Clear search">×</button></div>
+          <div class="filter-row"><button class="filter-chip selected" data-filter="all">All documents</button><button class="filter-chip" data-filter="image">Images</button><button class="filter-chip" data-filter="pdf">PDFs</button></div>
+          <div id="documentList" class="document-list"></div>
+          <div id="emptyLibrary" class="empty-state hidden"><span>▤</span><h3>No documents found</h3><p>Try another search or add a document to your library.</p><button id="emptyUpload" class="button button-secondary">Add a document</button></div>
+        </section>
+        <section class="card assistant-card">
+          <div class="assistant-title"><span class="assistant-avatar">✦</span><div><h2>Smart AI Search</h2><p><span class="online-dot"></span> Document-aware assistant</p></div><span class="beta-tag">BETA</span></div>
+          <div class="assistant-intro"><h3>What can I help you find?</h3><p>Ask about your saved documents or try a general question.</p></div>
+          <div class="suggestion-prompts"><button class="prompt-chip">How many documents do I have?</button><button class="prompt-chip">Find my Aadhaar card</button><button class="prompt-chip">Which documents are PDFs?</button></div>
+          <div id="chatMessages" class="chat-messages" aria-live="polite"><div class="chat-bubble assistant-bubble">Hi! I can search your uploaded document records and answer simple questions about your library. What would you like to find?</div></div>
+          <form id="chatForm" class="chat-input-row"><input id="chatInput" type="text" placeholder="Ask SmartDoc..." maxlength="500" autocomplete="off" required><button type="submit" aria-label="Send message">↑</button></form>
+          <p class="assistant-disclaimer">Prototype assistant: answers are based on your library metadata and OCR text. A live generative AI model requires a secure backend integration.</p>
+        </section>
+      </div>
+      <section class="card security-banner"><span class="security-banner-icon">⌑</span><div><strong>Your library is personal</strong><p>Document details are only shown to your signed-in account through configured access rules.</p></div><span class="security-status"><i></i> Account protected</span></section>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status"></div>
+  <div id="documentModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-backdrop" id="modalBackdrop"></div><div class="modal-panel"><button id="closeModal" class="modal-close" aria-label="Close">×</button><div id="modalIcon" class="modal-file-icon">PDF</div><p class="eyebrow">DOCUMENT DETAILS</p><h2 id="modalTitle">Document</h2><p id="modalType" class="modal-type"></p><div id="modalDetails" class="modal-details"></div><div id="modalPreview" class="modal-preview"></div><div class="modal-actions"><button id="downloadDocument" class="button button-secondary">Download</button><button id="deleteDocument" class="button button-danger">Delete document</button></div></div>
+  </div>
+
+  <footer class="site-footer"><span>▤ SmartDoc Locker</span><span>Built for learning · Handle sensitive files carefully</span></footer>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
