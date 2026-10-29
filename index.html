@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./styles-extra.css">
 </head>
 <body>
   <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
@@ -18,6 +19,7 @@
       <span>SmartDoc <b>Locker</b></span>
     </a>
     <div class="topbar-right">
+      <button id="themeToggle" class="button button-secondary theme-toggle" type="button" aria-pressed="false">☼ Light mode</button>
       <span class="secure-pill"><span class="pulse-dot"></span> Private workspace</span>
       <button id="headerSignOut" class="button button-quiet hidden">Sign out</button>
     </div>
@@ -125,7 +127,7 @@
         <section class="card library-card">
           <div class="section-title"><div><h2>Your documents</h2><p>Search by name, type, or extracted text.</p></div><button id="backToUpload" class="inline-link">Manage uploads</button></div>
           <div class="search-row"><span>⌕</span><input id="documentSearch" type="search" placeholder="Try “Aadhaar card” or “marks card”"><button id="clearSearch" aria-label="Clear search">×</button></div>
-          <div class="filter-row"><button class="filter-chip selected" data-filter="all">All documents</button><button class="filter-chip" data-filter="image">Images</button><button class="filter-chip" data-filter="pdf">PDFs</button></div>
+          <div class="filter-row feature-filters"><button class="filter-chip selected" data-filter="all">All documents</button><button class="filter-chip" data-filter="image">Images</button><button class="filter-chip" data-filter="pdf">PDFs</button><button class="filter-chip" data-filter="favorites">★ Favorites</button><label class="category-filter-label">Category <select id="categoryFilter"><option value="all">All categories</option></select></label></div>
           <div id="documentList" class="document-list"></div>
           <div id="emptyLibrary" class="empty-state hidden"><span>▤</span><h3>No documents found</h3><p>Try another search or add a document to your library.</p><button id="emptyUpload" class="button button-secondary">Add a document</button></div>
         </section>
@@ -144,7 +146,7 @@
 
   <div id="toast" class="toast" role="status"></div>
   <div id="documentModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-    <div class="modal-backdrop" id="modalBackdrop"></div><div class="modal-panel"><button id="closeModal" class="modal-close" aria-label="Close">×</button><div id="modalIcon" class="modal-file-icon">PDF</div><p class="eyebrow">DOCUMENT DETAILS</p><h2 id="modalTitle">Document</h2><p id="modalType" class="modal-type"></p><div id="modalDetails" class="modal-details"></div><div id="modalPreview" class="modal-preview"></div><div class="modal-actions"><button id="downloadDocument" class="button button-secondary">Download</button><button id="deleteDocument" class="button button-danger">Delete document</button></div></div>
+    <div class="modal-backdrop" id="modalBackdrop"></div><div class="modal-panel"><button id="closeModal" class="modal-close" aria-label="Close">×</button><div id="modalIcon" class="modal-file-icon">PDF</div><p class="eyebrow">DOCUMENT DETAILS</p><h2 id="modalTitle">Document</h2><p id="modalType" class="modal-type"></p><div id="modalDetails" class="modal-details"></div><div id="modalPreview" class="modal-preview"></div><section class="metadata-editor"><h3>Document tools</h3><button id="toggleFavorite" class="button button-secondary" type="button">☆ Add to favorites</button><label>Tags <input id="documentTags" type="text" maxlength="200" placeholder="college, important, personal"></label><label>Expiry date <input id="documentExpiry" type="date"></label><label>Personal notes <textarea id="documentNotes" rows="3" maxlength="1000" placeholder="Add a note about this document…"></textarea></label><button id="saveMetadata" class="button button-primary" type="button">Save details</button><p id="metadataMessage" class="form-message" role="status"></p></section><div class="modal-actions"><button id="downloadDocument" class="button button-secondary">Download</button><button id="deleteDocument" class="button button-danger">Delete document</button></div></div>
   </div>
 
   <footer class="site-footer"><span>▤ SmartDoc Locker</span><span>Built for learning · Handle sensitive files carefully</span></footer>
