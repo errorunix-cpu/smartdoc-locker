@@ -3,13 +3,6 @@ import {
   getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
   sendPasswordResetEmail, updateProfile, onAuthStateChanged, signOut
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-import {
-  getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, where,
-  orderBy, serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
-import {
-  getStorage, ref, uploadBytes, getDownloadURL, deleteObject
-} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-storage.js";
 import { firebaseConfig, firebaseConfigured } from "./firebase-config.js";
 
 const $ = (id) => document.getElementById(id);
@@ -22,7 +15,7 @@ const DOC_TYPES = [
 ];
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 const MIN_DOCS = 4;
-let app, auth, db, storage, currentUser = null;
+let app, auth, currentUser = null;
 let docsCache = [];
 let selectedFile = null;
 let authMode = "signup";
@@ -56,12 +49,11 @@ function friendlyError(error) {
     "auth/wrong-password":"Email or password is incorrect.",
     "auth/too-many-requests":"Too many attempts. Please wait and try again.",
     "auth/network-request-failed":"Network issue. Check your internet connection.",
-    "permission-denied":"Firebase denied access. Check your Firestore/Storage security rules.",
-    "storage/unauthorized":"Storage access denied. Check your Firebase Storage rules."
+    "permission-denied":"Firebase denied access. Check your Firebase security settings."
   };
   return map[code] || error?.message || "Something went wrong. Please try again.";
 }
-function isConfigured() { return firebaseConfigured && auth && db && storage; }
+function isConfigured() { return firebaseConfigured && auth; }
 function requireConfigured() {
   if (!firebaseConfigured) {
     setMessage("authMessage", "Firebase is not configured yet. Follow SETUP.md and paste your web app config into firebase-config.js.");
@@ -125,16 +117,8 @@ function renderUser(user) {
   $("headerSignOut").classList.remove("hidden");
 }
 async function loadDocuments() {
-  if (!currentUser || !db) return;
-  try {
-    const q = query(collection(db, "users", currentUser.uid, "documents"), orderBy("createdAt", "desc"));
-    const snapshot = await getDocs(q);
-    docsCache = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-  } catch (error) {
-    console.error(error);
-    showToast("Could not load documents. Check Firestore rules and indexes.");
-    docsCache = [];
-  }
+  // Demo mode: document records and file blobs live only in this page's memory.
+  // They are intentionally not saved to Firestore or Firebase Storage.
   updateUploadUI();
   renderDocuments();
   renderStats();
@@ -185,21 +169,18 @@ async function extractText(file) {
   }
 }
 async function uploadDocument(file, type) {
-  if (!currentUser || !storage || !db) throw new Error("Please sign in before uploading.");
+  if (!currentUser) throw new Error("Please sign in before uploading.");
   const cleanName = file.name.replace(/[^\w.\- ()]/g, "_").slice(0, 120) || "document";
-  const uniqueName = `${Date.now()}_${crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2)}_${cleanName}`;
-  const path = `users/${currentUser.uid}/documents/${uniqueName}`;
-  const storageRef = ref(storage, path);
-  await uploadBytes(storageRef, file, { contentType: file.type });
-  const downloadURL = await getDownloadURL(storageRef);
   const ocrText = await extractText(file);
+  const previewURL = URL.createObjectURL(file);
   const record = {
+    id: `temp_${Date.now()}_${Math.random().toString(36).slice(2)}`,
     fileName: cleanName, type, fileType: file.type === "application/pdf" ? "pdf" : "image",
-    contentType: file.type, size: file.size, storagePath: path, downloadURL,
-    ocrText: maskSensitive(ocrText), createdAt: serverTimestamp(), ownerUid: currentUser.uid
+    contentType: file.type, size: file.size, blob: file, previewURL, downloadURL: previewURL,
+    ocrText: maskSensitive(ocrText), createdAt: new Date(), ownerUid: currentUser.uid
   };
-  const created = await addDoc(collection(db, "users", currentUser.uid, "documents"), record);
-  return { id: created.id, ...record };
+  docsCache.unshift(record);
+  return record;
 }
 async function openDocument(id) {
   const d = docsCache.find(item => item.id === id);
@@ -221,18 +202,15 @@ async function openDocument(id) {
   $("documentModal").classList.remove("hidden");
 }
 async function deleteActiveDocument() {
-  const d = docsCache.find(item => item.id === activeDocId);
-  if (!d || !currentUser) return;
-  if (!confirm(`Delete "${d.fileName}"? This cannot be undone.`)) return;
-  try {
-    if (d.storagePath) await deleteObject(ref(storage, d.storagePath)).catch(error => {
-      if (error.code !== "storage/object-not-found") throw error;
-    });
-    await deleteDoc(doc(db, "users", currentUser.uid, "documents", d.id));
-    $("documentModal").classList.add("hidden");
-    await loadDocuments();
-    showToast("Document deleted.");
-  } catch (error) { showToast(friendlyError(error)); }
+  const index = docsCache.findIndex(item => item.id === activeDocId);
+  if (index < 0 || !currentUser) return;
+  const d = docsCache[index];
+  if (!confirm(`Delete "${d.fileName}" from this temporary session?`)) return;
+  if (d.previewURL) URL.revokeObjectURL(d.previewURL);
+  docsCache.splice(index, 1);
+  $("documentModal").classList.add("hidden");
+  await loadDocuments();
+  showToast("Document removed from this temporary session.");
 }
 function addChatBubble(text, who = "assistant") {
   const div = document.createElement("div");
@@ -333,8 +311,8 @@ async function handleUploadSubmit(event) {
   try {
     await uploadDocument(selectedFile, $("docType").value);
     resetFileSelection(); await loadDocuments();
-    setMessage("uploadMessage", "Document uploaded successfully.", true);
-    showToast("Document added to your library.");
+    setMessage("uploadMessage", "Document added to temporary browser memory. It will disappear when this page is refreshed or closed.", true);
+    showToast("Document added for this session only.");
   } catch (error) {
     console.error(error); setMessage("uploadMessage", friendlyError(error));
   } finally {
@@ -351,71 +329,3 @@ function wireEvents() {
     const input = $("password"); input.type = input.type === "password" ? "text" : "password";
     $("togglePassword").textContent = input.type === "password" ? "Show" : "Hide";
   });
-  $("forgotPassword").addEventListener("click", async () => {
-    if (!requireConfigured()) return;
-    const email = $("email").value.trim();
-    if (!email) return setMessage("authMessage", "Enter your email address first.");
-    try { await sendPasswordResetEmail(auth, email); setMessage("authMessage", "Password reset email sent. Check your inbox.", true); }
-    catch (error) { setMessage("authMessage", friendlyError(error)); }
-  });
-  $("authForm").addEventListener("submit", handleAuthSubmit);
-  $("docFile").addEventListener("change", event => selectFile(event.target.files[0]));
-  $("dropzone").addEventListener("dragover", event => { event.preventDefault(); $("dropzone").classList.add("dragover"); });
-  $("dropzone").addEventListener("dragleave", () => $("dropzone").classList.remove("dragover"));
-  $("dropzone").addEventListener("drop", event => { event.preventDefault(); $("dropzone").classList.remove("dragover"); selectFile(event.dataTransfer.files[0]); });
-  $("uploadForm").addEventListener("submit", handleUploadSubmit);
-  $("continueDashboard").addEventListener("click", () => { if (docsCache.length >= MIN_DOCS) { showPage("pageDashboard"); renderDocuments(); } });
-  $("uploadMore").addEventListener("click", () => { $("docType").focus(); $("uploadForm").scrollIntoView({behavior:"smooth",block:"center"}); });
-  $("dashboardUpload").addEventListener("click", goToUpload);
-  $("backToUpload").addEventListener("click", goToUpload);
-  $("emptyUpload").addEventListener("click", goToUpload);
-  $("documentSearch").addEventListener("input", renderDocuments);
-  $("clearSearch").addEventListener("click", () => { $("documentSearch").value = ""; renderDocuments(); });
-  document.querySelectorAll(".filter-chip").forEach(button => button.addEventListener("click", () => {
-    activeFilter = button.dataset.filter;
-    document.querySelectorAll(".filter-chip").forEach(item => item.classList.toggle("selected", item === button));
-    renderDocuments();
-  }));
-  $("chatForm").addEventListener("submit", event => { event.preventDefault(); sendQuestion($("chatInput").value); });
-  document.querySelectorAll(".prompt-chip").forEach(button => button.addEventListener("click", () => sendQuestion(button.textContent)));
-  $("headerSignOut").addEventListener("click", async () => {
-    try { await signOut(auth); currentUser = null; docsCache = []; $("headerSignOut").classList.add("hidden"); showPage("pageWelcome"); showToast("Signed out securely."); }
-    catch (error) { showToast(friendlyError(error)); }
-  });
-  $("closeModal").addEventListener("click", () => $("documentModal").classList.add("hidden"));
-  $("modalBackdrop").addEventListener("click", () => $("documentModal").classList.add("hidden"));
-  $("deleteDocument").addEventListener("click", deleteActiveDocument);
-  $("downloadDocument").addEventListener("click", () => {
-    const d = docsCache.find(item => item.id === activeDocId);
-    if (!d?.downloadURL) return showToast("Download link is not available.");
-    const a = document.createElement("a"); a.href = d.downloadURL; a.target = "_blank"; a.rel = "noopener noreferrer"; a.download = d.fileName; a.click();
-  });
-  document.addEventListener("keydown", event => { if (event.key === "Escape") $("documentModal").classList.add("hidden"); });
-}
-function initFirebase() {
-  if (!firebaseConfigured) {
-    console.info("SmartDoc Locker is in setup mode. Add your Firebase web configuration in firebase-config.js.");
-    return;
-  }
-  try {
-    app = initializeApp(firebaseConfig);
-    auth = getAuth(app); db = getFirestore(app); storage = getStorage(app);
-    onAuthStateChanged(auth, async user => {
-      currentUser = user;
-      if (user) {
-        renderUser(user);
-        await loadDocuments();
-        if (pages.some(id => $(id).classList.contains("active")) && $("pageWelcome").classList.contains("active")) {
-          showPage(docsCache.length >= MIN_DOCS ? "pageDashboard" : "pageUpload");
-        }
-      } else {
-        $("headerSignOut").classList.add("hidden");
-      }
-    });
-  } catch (error) {
-    console.error(error); showToast("Firebase initialization failed. Check firebase-config.js.");
-  }
-}
-fillDocTypes();
-wireEvents();
-initFirebase();
